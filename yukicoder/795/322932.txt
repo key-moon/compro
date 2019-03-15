@@ -1,0 +1,2 @@
+// detail: https://yukicoder.me/submissions/322932
+Yes
