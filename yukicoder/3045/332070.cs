@@ -1,0 +1,36 @@
+// detail: https://yukicoder.me/submissions/332070
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System.Numerics;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using static System.Math;
+using Debug = System.Diagnostics.Debug;
+using LayoutKind = System.Runtime.InteropServices.LayoutKind;
+using MethodImplOptions = System.Runtime.CompilerServices.MethodImplOptions;
+using MethodImplAttribute = System.Runtime.CompilerServices.MethodImplAttribute;
+
+
+static class P
+{
+    static void Main()
+    {
+        string s = "ABCDEFGHIJKLMNOPQRSTUVWXZABCDEFGHIJKLMNPQRSTVWXYZ_BCDEFGHIJKLMNOPQSTUVWXYZABCDFGHIJKLMN OPQRSTUVWXYZ_ABCDEFHJKLMNOPQRSTUWXYZABCDFGHIJKLMOPQRSTUVWXYZ_ABCDEFGHIJKLMNOPQRSUVXYZABCDEFGHIJKLMNPQRSTUVWXYZ_ABCDEFGHJKLMOPQRSUVWXYZABCDFHIJKLMNOPQRSTUVWXYZABCDFGHIJKLMNOPQ TUVWXYZ_ABCDEFGHIJKLMOPQRSTUVWXYZ_BCDEFGHIJKLMOPQRSTUVWXYZABCEFGHIJKLMNOPQRSTUVWXYZ_ABC DEFGHIJKLNOPQRSTUVWXYZ._ABCDEFGHIJKLMNOPQRSTUVWXZABCDEFGHIJKLMNPQRSTVWXYZABCDEFGHIJKLMN OPQSTUVWXYZ_ABCDEFGHIJKLMNOPQRSUVWXYZBCDEFGHIJKLMNOPQRTUVWXYZABCDEFGHIJLMNOPQRSTUVWXYZ_ ABCDEFGHJKLMNOPQRTUVWXYZ_ABCDEFGHIJKLMNOPQRSUVWXYZABCDEFGHIJKLMNPQRSTUVWXYZ_ABCDEGHJKLM OPQRSTUVWXYZABCEFGHIJKLMNOPQRSTUVWXYZ_ABCDEFGHIJKLMNOPQRSUVWXYZABCDEFGIJKLMNOPQRSTUVWXY ZABCDFGHIJKLMNOPQRSTUVWXYZ_ABCDEGHIJKLMNOPQRSTUVWXYZBDEFGHIJKLMNOPQRSUVWXYZABCDEFGHIJKL MNPQSTUVWXYZABCDEFGHJKLMNOPQRSTUVWXYZBCDEFGHIJKMNOPQRSTUVWXYZ_ABCDEFGHIJKLMNPQRSTUVWXYZ ABCDEGHIJKLMNOPQRSTUVWXYZ_ABCDEFGHIJKLMOPQRSTUVWXYZ,_ABCDEFGHIJKLNPQRSTUVWXYZABCEFGHIJK LMNOPQRSTVWXYZABCDEFGHIJKMNPQRSTUVWXYZ_ABCDEFGHIJKLNOPQRSTUVWXYZ";
+        Debug.WriteLine(string.Join("", s.Split('Z').Select(x => string.Join("",x.TakeWhile(y => !char.IsUpper(y))) + string.Join("",Enumerable.Range((int)'A', 25).Except(x.SkipWhile(y => !char.IsUpper(y)).Select(y => (int)y)).Select(y => (char)y)))));
+        var nm = Console.ReadLine().Split().Select(int.Parse).ToArray();
+        if(nm[0] >= nm[1])
+        {
+            Console.WriteLine(0);
+            return;
+        }
+        long res = 1;
+        for (int i = 1; i <= nm[0]; i++) res = (res * i) % nm[1];
+        Console.WriteLine(res);
+    }
+}
+
+
