@@ -1,0 +1,15 @@
+# detail: https://yukicoder.me/submissions/359026
+p = int(input())
+fibs = [0]*2000001
+fibs[1] = 0;
+fibs[2] = 1;
+for i in range(3, len(fibs)):
+	fibs[i] = (fibs[i - 1] * p + fibs[i - 2]) % 1000000007
+
+res = [0]*2000001;
+for i in range(4, len(fibs)):
+	res[i] = ((i - 3) * fibs[i - 2] - res[i - 2]) % 1000000007
+
+Q = int(input())
+for i in range(Q):
+	print(res[int(input())])
