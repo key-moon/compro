@@ -1,0 +1,2 @@
+// detail: https://atcoder.jp/contests/tenka1-2015-quala/submissions/12242086
+654231
