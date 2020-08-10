@@ -1,0 +1,55 @@
+# detail: https://atcoder.jp/contests/agc047/submissions/15801381
+n=97
+r=range
+L='<'
+P='+'
+l=[3933,P,0,1,n,L,2,n,n,P,0,n,3,P,1,n,4]
+a=lambda i,j:[P,i,j,i]
+b=lambda i:[P,i,i,i+1]
+def d(x,i,j):
+	return sum([sum([b(j+t-1),a(j+t,n),*(b(s)for s in r(j+t,j+29)),[L,j+29,x,i+t],b(j+t-1),a(j+t,i+t)],[])for t in r(30)],[])
+l+=d(3,5,36)
+l+=d(4,36,67)
+for t in r(59):
+	l+=a(2,2)
+	for s in r(t+1):
+		if t-30<s<30:l+=[P,5+t-s,36+s,98];l+=[L,n,98,99];l+=a(2,99)
+print(*l)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
