@@ -1,0 +1,85 @@
+// detail: https://onlinejudge.u-aizu.ac.jp/status/users/keymoon/submissions/1/1330/judge/4945392/C++17
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+#define var auto
+
+const char newl = '\n';
+
+template< typename T1, typename T2 >
+inline void chmin(T1 &a, T2 b) { if (a > b) a = b; }
+template< typename T1, typename T2 >
+inline void chmax(T1 &a, T2 b) { if (a < b) a = b; }
+
+//BEGIN CUT HERE
+template <typename T>
+struct WeightedUnionFind{
+  vector<int> rs,ps;
+  vector<T> ws;
+
+  WeightedUnionFind(){}
+  WeightedUnionFind(int n):
+    rs(n,1),ps(n),ws(n,T(0)){iota(ps.begin(),ps.end(),0);}
+
+  int find(int x){
+    if(x==ps[x]) return x;
+    int t=find(ps[x]);
+    ws[x]+=ws[ps[x]];
+    return ps[x]=t;
+  }
+
+  T weight(int x){
+    find(x);
+    return ws[x];
+  }
+
+  bool same(int x,int y){
+    return find(x)==find(y);
+  }
+
+  void unite(int x,int y,T w){
+    w+=weight(x);
+    w-=weight(y);
+    x=find(x);y=find(y);
+    if(x==y) return;
+    if(rs[x]<rs[y]) swap(x,y),w=-w;
+    rs[x]+=rs[y];
+    ps[y]=x;
+    ws[y]=w;
+  }
+
+  T diff(int x,int y){
+    return weight(y)-weight(x);
+  }
+};
+//END CUT HERE
+
+int main(){
+  int n, m;
+  cin >> n >> m;
+  if (n == 0) return 0;
+  WeightedUnionFind<int> wuf(n + 1);
+  for (int i = 0; i < m; i++){
+    char c;
+    cin >> c;
+    int a, b;
+    cin >> a >> b;
+    if (c == '!'){
+      int w;
+      cin >> w;
+      wuf.unite(a, b, w);
+    }
+    else{
+      int aw = wuf.weight(a), bw = wuf.weight(b);
+      if (wuf.same(a, b)){
+        cout << bw - aw << endl;
+      }
+      else{
+        cout << "UNKNOWN" << endl;
+      }
+    }
+  }
+  main();
+}
+
