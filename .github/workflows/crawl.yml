@@ -1,0 +1,23 @@
+name: Crawl
+
+on: 
+  schedule:
+  - cron:  '20 20 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Setup dotnet-script
+      run: dotnet tool install -g dotnet-script
+    - name: fetch sources
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet-script crawler/main.csx
