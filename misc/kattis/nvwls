@@ -1,0 +1,161 @@
+#pragma GCC optimize("O3")
+
+#include<bits/stdc++.h>
+
+using ll = long long;
+using ull = unsigned long long;
+#define var auto
+
+using namespace std;
+
+template<typename T1, typename T2> inline void chmin(T1& a, T2 b) { if (a > b) a = b; }
+template<typename T1, typename T2> inline void chmax(T1& a, T2 b) { if (a < b) a = b; }
+
+
+struct rollinghash {
+  const int B = 100;
+  const ull MASK30 = (1ULL << 30) - 1;
+  const ull MASK31 = (1ULL << 31) - 1;
+  const ull M = (1ULL << 61) - 1;
+  const ull POSITIVIZER = M * ((1ULL << 3) - 1);
+
+  int n;
+  vector<ull> hash;
+  vector<ull> pow;
+
+  rollinghash(string s) {
+    n = s.size();
+    hash.resize(n + 1); pow.resize(n + 1);
+    pow[0] = 1;
+    hash[0] = 0;
+
+    for (int i = 0; i < n; i++) {
+      hash[i + 1] = _calc_mod(_mul(hash[i], B) + (ull)s[i]);
+      pow[i + 1] = _calc_mod(_mul(pow[i], B));
+    }
+  }
+
+  ull slice() { return slice(0, n); }
+  //S[l, r)
+  ull slice(int l, int r) {
+    return _calc_mod(hash[r] + POSITIVIZER - _mul(hash[l], pow[r - l]));
+  }
+
+  ull _mul(ull a, ull b) {
+    ull au = a >> 31;
+    ull ad = a & MASK31;
+    ull bu = b >> 31;
+    ull bd = b & MASK31;
+    ull mid = ad * bu + au * bd;
+    ull midu = mid >> 30;
+    ull midd = mid & MASK30;
+    return au * bu * 2 + midu + (midd << 31) + ad * bd;
+  }
+
+  ull _calc_mod(ull val) {
+    val = (val & M) + (val >> 61);
+    if (val >= M) val -= M;
+    return val;
+  }
+};
+
+struct Key {
+  int len;
+  int ind;
+  ull hash;
+  int score;
+};
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+
+  int n;
+  cin >> n;
+  vector<string> words(n);
+  for (int i = 0; i < n; i++) cin >> words[i];
+  vector<Key> keys(n);
+
+  //cerr << "END READ" << endl;
+  const int SHORT_LEN = 256;
+  unordered_map<ull, Key> shortdic{};
+  shortdic.reserve(n);
+  vector<Key> longkeys{};
+  for (int i = 0; i < n; i++) {
+    string s = "";
+    int score = 0;
+    for (var c : words[i]) {
+      if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') score++;
+      else s += c;
+    }
+    Key key;
+    key.ind = i;
+    key.len = s.size();
+    key.hash = rollinghash(s).slice();
+    key.score = score;
+    keys.push_back(key);
+
+    if (key.len < SHORT_LEN) {
+      if (shortdic[key.hash].score <= key.score) shortdic[key.hash] = key;
+    }
+    else {
+      longkeys.emplace_back(key);
+    }
+  }
+
+  //cerr << "END PUSH" << endl;
+
+  string s;
+  cin >> s;
+  rollinghash rh(s);
+  int slen = s.size();
+  vector<int> dp(slen + 1, -1);
+  vector<int> prevPos(slen + 1, -1);
+  vector<int> used(slen + 1, -1);
+  dp[0] = 0;
+  for (int i = 0; i < slen; i++) {
+    if (i != 0 && prevPos[i] == -1) continue;
+    var ub = min(i + SHORT_LEN, slen);
+    for (int j = i + 1; j <= ub; j++) {
+      var hash = rh.slice(i, j);
+      if (!shortdic.count(hash)) continue;
+      var key = shortdic[hash];
+      var nxt = dp[i] + key.score;
+      if (dp[j] < nxt) {
+        dp[j] = nxt;
+        prevPos[j] = i;
+        used[j] = key.ind;
+      }
+    }
+    for (var&& key : longkeys) {
+      var j = i + key.len;
+      if (slen < j) continue;
+      if (rh.slice(i, j) != key.hash) continue;
+      var nxt = dp[i] + key.score;
+      if (dp[j] < nxt) {
+        dp[j] = nxt;
+        prevPos[j] = i;
+        used[j] = key.ind;
+      }
+    }
+  }
+
+  //cerr << "END DP" << endl;
+
+  vector<int> resInds{};
+  int prev = slen;
+  assert(used[prev] != -1);
+  while (used[prev] != -1) {
+    resInds.emplace_back(used[prev]);
+    prev = prevPos[prev];
+  }
+  reverse(resInds.begin(), resInds.end());
+  bool first = true;
+  for (var&& ind : resInds) {
+    if (first) first = false;
+    else cout << " ";
+    cout << words[ind];
+  }
+  cout << endl;
+  //cerr << "END OUT" << endl;
+}
