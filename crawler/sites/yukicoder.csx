@@ -82,10 +82,14 @@ async Task<YukicoderSubmission[]> GetYukicoderSubmissionsAsync()
       record.Status = statusNode.TextContent.Trim();
 
       var cpuTimeNode = row.Children[7];
-      long.TryParse(Regex.Match(cpuTimeNode.TextContent.Trim(), @"\d+").Value, out record.CpuTime);
+      long cpuTime;
+      long.TryParse(Regex.Match(cpuTimeNode.TextContent.Trim(), @"\d+").Value, out cpuTime);
+      record.CpuTime = cpuTime;
 
       var codeSizeNode = row.Children[8];
-      long.TryParse(Regex.Match(codeSizeNode.TextContent.Trim(), @"\d+").Value, out record.CodeSize);
+      long codeSize;
+      long.TryParse(Regex.Match(codeSizeNode.TextContent.Trim(), @"\d+").Value, out codeSize);
+      record.CodeSize = codeSize;
 
       list.Add(new YukicoderSubmission(record));
     }
