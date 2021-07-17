@@ -1,0 +1,20 @@
+# detail: https://atcoder.jp/contests/abc210/submissions/24315171
+from math import gcd
+
+n, m = map(int, input().split())
+
+l = []
+
+for i in range(m):
+    a, c = map(int, input().split())
+    l.append((c, a))
+
+l.sort()
+
+cost = 0
+for c, a in l:
+    new_n = gcd(n, a)
+    cost += c * (n - new_n)
+    n = new_n
+
+print(cost if n == 1 else -1)
