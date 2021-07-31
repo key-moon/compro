@@ -1,0 +1,114 @@
+# detail: https://atcoder.jp/contests/abc164/submissions/24633601
+import sys
+from math import inf
+from typing import Callable, Dict, Generic, List, Tuple, TypeVar
+
+import heapq
+
+T = TypeVar('T')
+
+class LazyObject:
+  @property
+  def value(self):
+    raise NotImplementedError()
+
+class EnumerateObject(LazyObject, Generic[T]):
+  def __init__(self, prevEnumerate, elems: List[T]):
+    self._prevEnumerate: EnumerateObject = prevEnumerate
+    self._elems = elems
+  def __add__(self, other):
+    if isinstance(other, EnumerateObject):
+      other = other.value
+    if isinstance(other, list):
+      return EnumerateObject(self, other)
+  def append(self, elem: T):
+    return EnumerateObject(self, [elem])
+  @property
+  def value(self) -> List[T]:
+    if self._prevEnumerate is None:
+      return self._elems[:]
+    res = self._prevEnumerate.value
+    res.extend(self._elems)
+    return res
+
+def alert_slow_interpreter():
+  print("This program seems to be running on a slow interpreter. Algorithm-related libraries are computationally heavy, so it is recommended to use a fast interpreter such as pypy.")
+
+__fast_cache = None
+def is_fast_interpreter():
+  global __fast_cache
+  if __fast_cache is None: 
+    __fast_cache = "pypy" in sys.executable
+    if not __fast_cache: alert_slow_interpreter()
+  return __fast_cache
+
+StateT = TypeVar('StateT')
+DistT = TypeVar('DistT')
+EdgeT = TypeVar('EdgeT')
+class ShortestPathResultContainer:
+  def __init__(self, dic, infinity=inf):
+    self._dic = dic
+    self._infinity = infinity
+  def __getitem__(self, item):
+    if item in self._dic: return self._dic[item]
+    return (self._infinity, EnumerateObject(None, []))
+
+class ShortestPath(Generic[StateT, DistT, EdgeT]):
+  def __init__(self, transition: Callable[[StateT], Tuple[StateT, DistT, EdgeT]], infinity=inf):
+    is_fast_interpreter()
+    self.transition = transition
+    self.memo: Dict[StateT, ShortestPathResultContainer] = dict()
+    self.infinity = infinity
+  def __getitem__(self, initState: StateT):
+    if initState not in self.memo:
+      res: Dict[StateT, (DistT, EnumerateObject)] = dict()
+      reached = set()
+      heap = []
+      for (next, d, edge) in self.transition(initState):
+        if (next in res) and (res[next][0] <= d): continue
+        res[next] = (d, EnumerateObject(None, [edge]))
+        heap.append((d, next))
+      heapq.heapify(heap)
+      while len(heap) != 0:
+        (_, elem) = heapq.heappop(heap)
+        if elem in reached: continue
+        reached.add(elem)
+        (cost, path) = res[elem]
+        for (next, d, edge) in self.transition(elem):
+          nextCost = cost + d
+          if (next in res) and (res[next][0] <= nextCost): continue
+          res[next] = (nextCost, path.append(edge))
+          heapq.heappush(heap, (nextCost, next))
+      self.memo[initState] = ShortestPathResultContainer(res, self.infinity)
+    return self.memo[initState]
+
+
+n, m, s = map(int, input().split())
+
+graph = [[] for _ in range(n)]
+
+for i in range(m):
+  u, v, a, b = map(int, input().split())
+  graph[u - 1].append((v - 1, a, b))
+  graph[v - 1].append((u - 1, a, b))
+
+exchanges = [(*map(int, input().split()), ) for _ in range(n)]
+
+def transition(state):
+  pos, money = state
+  if money <= n * 50:
+    rate, time = exchanges[pos]
+    yield ((pos, money + rate), time, None)
+  for to, cost, time in graph[pos]:
+    if money < cost: continue
+    yield ((to, money - cost), time, None)
+
+sp = ShortestPath(transition, infinity=inf)
+
+res = [inf for _ in range(n)]
+
+for key in sp[(0, min(n * 50, s))]._dic.keys():
+  res[key[0]] = min(res[key[0]], sp[(0, min(n * 50, s))][key][0])
+
+for i in range(1, n):
+  print(res[i])
