@@ -1,0 +1,2 @@
+// detail: https://atcoder.jp/contests/xmascon21/submissions/28091830
+DBDCD
