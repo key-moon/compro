@@ -1,0 +1,166 @@
+# detail: https://atcoder.jp/contests/xmascon21/submissions/28095832
+LOCAL = False
+
+from math import floor
+import random
+
+
+random.seed(1337)
+if LOCAL:
+    import cols
+    random.shuffle(cols.cols_rgb_dark)
+
+R = (1, 0)
+L = (-1, 0)
+D = (0, 1)
+U = (0, -1)
+
+plans = [
+    # X
+    ((1, 11), (102, 119), R, 26),
+    ((77, 12), (2, 125), R, 28),
+    # M
+    ((122, 121), (142, 14), R, 26),
+    ((150, 14), (189, 88), R, 28),
+    ((177, 64), (225, 11), R, 22),
+    ((217, 14), (240, 123), R, 21),
+    # A
+    ((248, 134), (295, 19), R, 26),
+    ((316, 16), (346, 135), R, 25),
+    ((283, 77), (346, 77), D, 20),
+    # S
+    ((420, 5), (464, 26), D, 23),
+    ((420, 5), (388, 23), D, 23),
+    ((386, 33), (376, 71), R, 25),
+    ((400, 63), (463, 70), D, 29),
+    ((447, 85), (459, 130), R, 25),
+
+    # C
+    ((48, 151), (71, 191), R, 20),
+    ((54, 152), (27, 195), L, 24),
+    ((35, 158), (66, 154), D, 15),
+    ((4, 195), (4, 239), R, 20),
+    ((4, 195), (4, 239), R, 20),
+    ((2, 239), (19, 277), R, 20),
+    ((59, 229), (50, 258), R, 21),
+    ((25, 259), (69, 256), D, 21),
+    # O
+    ((105, 151), (138, 155), D, 21),
+    ((104, 248), (139, 249), D, 21),
+    ((80, 213), (98, 152), R, 21),
+    ((80, 213), (98, 272), R, 21),
+
+    ((137, 153), (396, 158), D, 112),
+
+    # S2
+    ((365, 167), (420, 169), D, 22),
+    ((350, 189), (405, 263), R, 24),
+    ((358, 240), (412, 263), D, 22),
+    # T2
+    ((425, 168), (494, 168), D, 18),
+    ((453, 187), (447, 274), R, 19),
+    #usagi
+    ((72, 289), (50, 380), R, 42),
+    ((115, 345), (191, 348), D, 55),
+    ((15, 376), (129, 385), D, 100),
+
+
+    ((254, 334), (254, 405), R, 28),
+    ((308, 306), (311, 448), R, 28),
+
+     # 202X
+    ((473, 317), (473, 441), R, 19),
+    ((449, 330), (472, 322), D, 15),
+
+    # 20X1
+    ((445, 443), (360, 454), U, 18),
+    ((420, 370), (370, 440), R, 22),
+    ((420, 325), (420, 371), R, 22),
+    ((440, 325), (400, 300), D, 22),
+    ((400, 300), (370, 320), D, 22),
+]
+
+def getline(x0, y0, x1, y1):
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = +1 if x0 < x1 else -1
+    sy = +1 if y0 < y1 else -1
+    err = dx - dy
+    res = []
+    while True:
+        res.append((x0, y0))
+        if x0 == x1 and y0 == y1:
+            return res
+        e2 = err * 2
+        if e2 > -dy:
+            err -= dy
+            x0 += sx
+        if e2 < dx:
+            err += dx
+            y0 += sy
+
+W = 500
+H = 500
+
+if LOCAL:
+    from PIL import Image
+    img = Image.new('RGB', (H, W), color=(255, 255, 255))
+    img = Image.open("input.png").convert("RGB")
+
+def drawline(x0, y0, x1, y1, color):
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = +1 if x0 < x1 else -1
+    sy = +1 if y0 < y1 else -1
+    err = dx - dy
+
+    while True: 
+        img.putpixel((x0, y0), tuple((a + b) // 2 for a, b in zip(img.getpixel((x0, y0)), color)))
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = err * 2
+        if e2 > -dy:
+            err -= dy
+            x0 += sx
+        if e2 < dx:
+            err += dx
+            y0 += sy
+
+canvas = [[(0, 0, 0)] * W for _ in range(H)]
+
+def fill(x0_0, y0_0, x1_0, y1_0, x0_1, y0_1, x1_1, y1_1):
+    l0 = getline(x0_0, y0_0, x1_0, y1_0)
+    l1 = getline(x0_1, y0_1, x1_1, y1_1)
+    step = max(len(l0), len(l1))
+    seq = []
+    for i in range(step):
+        seq.append(l0[int(floor(len(l0) / step * i))])
+        seq.append(l1[int(floor(len(l1) / step * i))])
+    if LOCAL:
+        col = cols.cols_rgb_dark.pop()
+        for (x0, y0), (x1, y1) in zip(seq, seq[1:]):
+            drawline(x0, y0, x1, y1, col)
+    return seq
+
+seq = []
+for (x0_0, y0_0), (x0_1, y0_1), (dx, dy), l in plans:
+    x1_0, y1_0 = x0_0 + dx * l, y0_0 + dy * l
+    x1_1, y1_1 = x0_1 + dx * l, y0_1 + dy * l
+    seq += fill(x0_0, y0_0, x1_0, y1_0, x0_1, y0_1, x1_1, y1_1)
+
+if LOCAL:    
+    print(f'T={len(seq)}')
+    img = img.resize((W * 2, H * 2))
+    img.save("res.png")
+    img.show()
+    exit(0)
+
+w, h, t = map(int, input().split())
+for _ in range(h): input()
+for x, y in seq:
+    moved = set()
+    while len(moved) != 2:
+        print(f'{x} {y}')
+        moved.add(input())
+print(f'-1 -1')
+
